@@ -1,0 +1,8 @@
+{
+  "name": "StudySim AI  2.0 final",
+  "description": "An AI-powered learning platform that transforms any topic, image, or video into smart notes and interactive simulations using the latest Gemini models.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

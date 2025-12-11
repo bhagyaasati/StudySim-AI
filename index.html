@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudySim AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- KaTeX for Math Formatting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        /* Light Mode: Matches Landing Page (Image 2) */
+        --bg-color: #FAFAFA;
+        --surface-color: #FFFFFF;
+        --surface-highlight: #F4F4F5;
+        --surface-input: #FFFFFF;
+        --border-color: #E4E4E7;
+        --text-main: #18181B;
+        --text-muted: #71717A;
+        --shadow-color: rgba(0,0,0,0.08);
+      }
+      
+      .dark {
+        /* Dark Mode: High Contrast Zinc Palette */
+        --bg-color: #09090B; /* Zinc 950 */
+        --surface-color: #18181B; /* Zinc 900 */
+        --surface-highlight: #27272A; /* Zinc 800 */
+        --surface-input: #27272A;
+        --border-color: #3F3F46; /* Zinc 700 */
+        --text-main: #FAFAFA; /* Zinc 50 */
+        --text-muted: #A1A1AA; /* Zinc 400 */
+        --shadow-color: rgba(0,0,0,0.5);
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      /* --- New Card Styles (Glass/Modern) --- */
+      .modern-card {
+        background-color: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: 2rem; /* Large rounded corners per reference */
+        box-shadow: 0 10px 40px -10px var(--shadow-color);
+        transition: all 0.3s ease;
+      }
+
+      /* Table Styles */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.95rem;
+      }
+      th, td {
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        text-align: left;
+      }
+      th {
+        background-color: var(--surface-highlight);
+        font-weight: 700;
+      }
+      tr:nth-child(even) {
+        background-color: var(--surface-highlight);
+      }
+      /* Ensure text in cells wraps nicely */
+      td {
+        word-break: break-word;
+        min-width: 120px;
+      }
+      
+      /* Animation Utilities */
+      .animation-delay-2000 {
+        animation-delay: 2s;
+      }
+      .animation-delay-4000 {
+        animation-delay: 4s;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              bg: 'var(--bg-color)',
+              surface: 'var(--surface-color)',
+              'surface-highlight': 'var(--surface-highlight)',
+              'surface-input': 'var(--surface-input)',
+              border: 'var(--border-color)',
+              
+              primary: '#5B5FFF',
+              'primary-hover': '#4E52E0',
+            },
+            fontFamily: {
+              sans: ['Figtree', 'Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+              serif: ['Playfair Display', 'serif'],
+            },
+            boxShadow: {
+              'neo': '0 0 0 1px rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.5)',
+            },
+            animation: {
+              'blob': 'blob 7s infinite',
+              'gradient-x': 'gradient-x 3s ease infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+            },
+            keyframes: {
+              blob: {
+                '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                '100%': { transform: 'translate(0px, 0px) scale(1)' },
+              },
+              'gradient-x': {
+                '0%, 100%': {
+                    'background-size': '200% 200%',
+                    'background-position': 'left center'
+                },
+                '50%': {
+                    'background-size': '200% 200%',
+                    'background-position': 'right center'
+                },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-20px)' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            }
+          },
+        },
+      };
+    </script>
+    <style>
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: var(--bg-color); }
+      ::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #777; }
+    </style>
+    <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.1",
+    "react-dom": "https://esm.sh/react-dom@^19.2.1"
+  }
+}
+</script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

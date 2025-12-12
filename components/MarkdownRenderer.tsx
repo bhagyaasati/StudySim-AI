@@ -28,7 +28,7 @@ const MarkdownRenderer: React.FC<Props> = ({ content, variant = 'default' }) => 
         try {
            if (window.katex) {
              const html = window.katex.renderToString(latex, { throwOnError: false, displayMode: false });
-             return <span key={i} dangerouslySetInnerHTML={{ __html: html }} className="inline-math" />;
+             return <span key={i} dangerouslySetInnerHTML={{ __html: html }} className="inline-math text-base" />;
            }
            return <span key={i} className="font-mono bg-yellow-100 dark:bg-yellow-900 px-1 rounded">{latex}</span>;
         } catch (e) {
@@ -63,7 +63,7 @@ const MarkdownRenderer: React.FC<Props> = ({ content, variant = 'default' }) => 
                         {boldParts.map((boldPart, k) => {
                             if (boldPart.startsWith('**') && boldPart.endsWith('**')) {
                                 return (
-                                    <strong key={k} className={`font-black ${isChat ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                                    <strong key={k} className={`font-black ${isChat ? '' : 'text-gray-900 dark:text-white'}`}>
                                         {boldPart.slice(2, -2)}
                                     </strong>
                                 );
@@ -141,6 +141,10 @@ const MarkdownRenderer: React.FC<Props> = ({ content, variant = 'default' }) => 
           blocks.push({ type: 'h3', content: line.replace('### ', '') });
           i++; continue;
       }
+      if (line.startsWith('#### ')) {
+          blocks.push({ type: 'h4', content: line.replace('#### ', '') });
+          i++; continue;
+      }
 
       // 4. Blockquotes
       if (line.startsWith('> ')) {
@@ -182,8 +186,8 @@ const MarkdownRenderer: React.FC<Props> = ({ content, variant = 'default' }) => 
   // --- RENDERER ---
   return (
     <div className={`
-      ${isChat ? 'text-sm space-y-2' : 'text-base md:text-lg space-y-4'} 
-      text-gray-700 dark:text-gray-300 leading-relaxed font-normal w-full
+      ${isChat ? 'text-sm space-y-2 text-inherit' : 'text-base md:text-lg space-y-4 text-gray-700 dark:text-gray-300'} 
+      leading-relaxed font-normal w-full
     `}>
         {blocks.map((block, idx) => {
             switch (block.type) {
@@ -208,11 +212,17 @@ const MarkdownRenderer: React.FC<Props> = ({ content, variant = 'default' }) => 
                             {block.content}
                         </h3>
                     );
+                case 'h4':
+                    return (
+                       <h4 key={idx} className={`font-bold text-gray-700 dark:text-gray-300 ${isChat ? 'text-xs mt-2 uppercase tracking-wider' : 'text-base md:text-lg mt-3 mb-1 uppercase tracking-wide opacity-80'}`}>
+                           {block.content}
+                       </h4>
+                   );
                 case 'blockquote':
                     return (
                         <div key={idx} className={`my-3 rounded-xl border flex items-start gap-3 ${isChat ? 'bg-white/10 border-white/20 p-3' : 'bg-gray-50 dark:bg-[#1A1A1A] border-gray-200 dark:border-white/10 p-4 shadow-sm'}`}>
-                            <div className={`mt-1 h-full w-1 rounded-full ${isChat ? 'bg-white/50' : 'bg-primary/50'}`}></div>
-                            <p className={`font-medium italic leading-relaxed break-words w-full ${isChat ? 'text-white' : 'text-gray-800 dark:text-gray-200 font-serif'}`}>
+                            <div className={`mt-1 h-full w-1 rounded-full ${isChat ? 'bg-current opacity-50' : 'bg-primary/50'}`}></div>
+                            <p className={`font-medium italic leading-relaxed break-words w-full ${isChat ? 'text-inherit' : 'text-gray-800 dark:text-gray-200 font-serif'}`}>
                                 {parseInline(block.content)}
                             </p>
                         </div>
@@ -220,14 +230,14 @@ const MarkdownRenderer: React.FC<Props> = ({ content, variant = 'default' }) => 
                 case 'ul':
                     return (
                         <div key={idx} className={`flex items-start gap-3 ${isChat ? 'ml-0' : 'ml-2 md:ml-4'}`}>
-                            <div className={`mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0 ${isChat ? 'bg-white/60' : 'bg-primary'}`}></div>
+                            <div className={`mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0 ${isChat ? 'bg-current opacity-60' : 'bg-primary'}`}></div>
                             <p className="flex-1">{parseInline(block.content)}</p>
                         </div>
                     );
                 case 'ol':
                      return (
                          <div key={idx} className={`flex items-start gap-2 ${isChat ? 'ml-0' : 'ml-2 md:ml-4'}`}>
-                             <span className={`font-bold tabular-nums ${isChat ? 'text-white/80' : 'text-primary'}`}>{block.num}</span>
+                             <span className={`font-bold tabular-nums ${isChat ? 'opacity-80' : 'text-primary'}`}>{block.num}</span>
                              <p className="flex-1">{parseInline(block.content)}</p>
                          </div>
                      );
@@ -305,7 +315,7 @@ const MarkdownRenderer: React.FC<Props> = ({ content, variant = 'default' }) => 
                      );
                 default:
                     return (
-                        <p key={idx} className={`${isChat ? 'text-white/90' : ''}`}>
+                        <p key={idx} className={`${isChat ? 'text-inherit' : ''}`}>
                             {parseInline(block.content)}
                         </p>
                     );

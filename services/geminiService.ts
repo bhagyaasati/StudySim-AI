@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { StudyPlan, StudyResult, QuizQuestion, DeepDiveMessage } from '../types';
 
@@ -182,9 +183,7 @@ export const finalizeStudyPackage = async (
   # STRICT FORMATTING RULES (CRITICAL)
   1. **NO WEIRD SYMBOLS:** - DO NOT use symbols like ◼, ◆, ❖, ⬢, ▓. 
      - **ONLY use asterisks (*)** for bullet points.
-     - Example: 
-       * Point 1
-       * Point 2
+     - Use standard Headers: #, ##, ###, ####.
 
   2. **MATHEMATICS & FORMULAS:**
      - **NO DUPLICATION:** Never write "Vf Vf". Write clearly.
@@ -308,7 +307,18 @@ export const generateStudySimulator = async (
 export const generateQuiz = async (context: string): Promise<QuizQuestion[]> => {
     const ai = getAiClient();
     const model = 'gemini-2.5-flash';
-    const prompt = `Generate 5 high-quality MCQs from this text: ${context.slice(0, 5000)}`;
+    
+    // IMPORTANT: Request double escaped backslashes for valid JSON parsing of LaTeX
+    const prompt = `
+    Generate 5 high-quality MCQs from this text: ${context.slice(0, 5000)}.
+    
+    IMPORTANT: 
+    - You must output valid JSON.
+    - For any math or LaTeX, use DOUBLE backslashes to escape them properly in the JSON string.
+      Example: Use "\\\\frac{a}{b}" instead of "\\frac{a}{b}".
+      Example: Use "\\\\Phi" instead of "\\Phi".
+    - Explanation should be detailed and also use LaTeX for formulas.
+    `;
     
     try {
         const response = await ai.models.generateContent({
@@ -334,6 +344,7 @@ export const generateQuiz = async (context: string): Promise<QuizQuestion[]> => 
         });
         return JSON.parse(response.text || "[]");
     } catch (e) {
+        console.error("Quiz Generation Error", e);
         return [];
     }
 };
@@ -346,7 +357,7 @@ export const queryDeepDive = async (
     const ai = getAiClient();
     const model = 'gemini-2.5-flash';
 
-    const systemPrompt = `You are a helpful tutor. Explain concepts using the context provided. Use LaTeX for math. Context: ${context.slice(0, 5000)}`;
+    const systemPrompt = `You are a helpful tutor. Explain concepts using the context provided. Use LaTeX for math (enclose in single $). Context: ${context.slice(0, 5000)}`;
 
     const contents = [
         ...history.map(msg => ({

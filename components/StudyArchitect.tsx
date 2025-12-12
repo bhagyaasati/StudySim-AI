@@ -903,7 +903,19 @@ const StudyArchitect: React.FC = () => {
                         {/* QUIZ TAB */}
                         {activeTab === 'QUIZ' && (
                             <div className="p-4 md:p-10 max-w-3xl mx-auto h-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300 print:hidden">
-                                {quizQuestions.length === 0 ? (
+                                {quizLoading ? (
+                                    <div className="flex flex-col items-center justify-center h-full text-center animate-in fade-in">
+                                        <div className="w-24 h-24 relative mb-8">
+                                            <div className="absolute inset-0 border-4 border-gray-200 dark:border-gray-800 rounded-full"></div>
+                                            <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <GraduationCap className="text-primary animate-pulse" size={32} />
+                                            </div>
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Drafting Assessment</h3>
+                                        <p className="text-gray-500 dark:text-gray-400">Analyzing notes and generating questions...</p>
+                                    </div>
+                                ) : quizQuestions.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-center">
                                         <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6 text-primary ring-4 ring-primary/5">
                                             <GraduationCap size={40} />
@@ -917,8 +929,7 @@ const StudyArchitect: React.FC = () => {
                                             disabled={quizLoading}
                                             className="px-8 py-4 bg-primary hover:bg-primary-hover text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-primary/30 flex items-center gap-2 active:scale-95 hover:-translate-y-1"
                                         >
-                                            {quizLoading ? <Loader2 className="animate-spin" /> : <Sparkles size={18} />}
-                                            {quizLoading ? 'Generating Questions...' : 'Generate Quiz'}
+                                            <Sparkles size={18} /> Generate Quiz
                                         </button>
                                     </div>
                                 ) : (
@@ -932,9 +943,11 @@ const StudyArchitect: React.FC = () => {
 
                                         {quizQuestions.map((q, idx) => (
                                             <div key={q.id} className="bg-surface-highlight border border-border p-6 rounded-2xl animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${idx * 100}ms` }}>
-                                                <h4 className="font-bold text-lg mb-4 text-gray-900 dark:text-white flex gap-3">
-                                                    <span className="text-primary opacity-50">0{idx + 1}.</span> 
-                                                    {q.question}
+                                                <h4 className="font-bold text-lg mb-4 text-gray-900 dark:text-white flex gap-3 items-start">
+                                                    <span className="text-primary opacity-50 mt-1">0{idx + 1}.</span> 
+                                                    <div className="flex-1">
+                                                        <MarkdownRenderer content={q.question} variant="chat" />
+                                                    </div>
                                                 </h4>
                                                 <div className="space-y-3 pl-0 md:pl-8">
                                                     {q.options.map((opt, oIdx) => {
@@ -959,23 +972,37 @@ const StudyArchitect: React.FC = () => {
                                                                 disabled={quizSubmitted}
                                                                 className={btnClass}
                                                             >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold transition-colors ${
+                                                                <div className="flex items-center gap-3 w-full">
+                                                                    <div className={`w-6 h-6 flex-shrink-0 rounded-full border flex items-center justify-center text-xs font-bold transition-colors ${
                                                                         isSelected || (quizSubmitted && isCorrect) ? 'border-current' : 'border-gray-300 dark:border-gray-600 text-gray-400'
                                                                     }`}>
                                                                         {['A','B','C','D'][oIdx]}
                                                                     </div>
-                                                                    <span>{opt}</span>
+                                                                    <div className="flex-1">
+                                                                         <MarkdownRenderer content={opt} variant="chat" />
+                                                                    </div>
                                                                 </div>
                                                                 {quizSubmitted && (
                                                                     isCorrect ? 
-                                                                    <CheckCircle size={20} className="text-green-500" /> : 
-                                                                    (isSelected ? <X size={20} className="text-red-500" /> : null)
+                                                                    <CheckCircle size={20} className="text-green-500 flex-shrink-0 ml-2" /> : 
+                                                                    (isSelected ? <X size={20} className="text-red-500 flex-shrink-0 ml-2" /> : null)
                                                                 )}
                                                             </button>
                                                         );
                                                     })}
                                                 </div>
+                                                
+                                                {/* Explanation Box */}
+                                                {quizSubmitted && (
+                                                    <div className="mt-4 ml-0 md:ml-8 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl animate-in fade-in slide-in-from-top-2">
+                                                        <div className="flex items-center gap-2 mb-2 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wide">
+                                                            <Lightbulb size={14} /> Explanation
+                                                        </div>
+                                                        <div className="text-sm text-gray-700 dark:text-gray-300">
+                                                            <MarkdownRenderer content={q.explanation} variant="chat" />
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
 
@@ -1042,7 +1069,7 @@ const StudyArchitect: React.FC = () => {
                                                 )}
                                                 <div className={`max-w-[85%] md:max-w-[75%] rounded-2xl p-4 shadow-sm ${
                                                     msg.role === 'user' 
-                                                        ? 'bg-gray-900 dark:bg-white text-white dark:text-black rounded-tr-none' 
+                                                        ? 'bg-gray-900 dark:bg-zinc-700 text-white dark:text-white rounded-tr-none' 
                                                         : 'bg-white dark:bg-[#1A1A1A] border border-border rounded-tl-none text-gray-900 dark:text-white'
                                                 }`}>
                                                     <MarkdownRenderer content={msg.content} variant="chat" />
@@ -1073,7 +1100,7 @@ const StudyArchitect: React.FC = () => {
                                             onChange={(e) => setChatInput(e.target.value)}
                                             placeholder="Ask a follow-up question..."
                                             disabled={chatLoading}
-                                            className="w-full bg-surface-input border border-border rounded-2xl pl-5 pr-14 py-4 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-shadow"
+                                            className="w-full bg-gray-100 dark:bg-[#2A2A2A] text-gray-900 dark:text-white border border-border rounded-2xl pl-5 pr-14 py-4 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-shadow placeholder-gray-500 dark:placeholder-gray-400"
                                          />
                                          <button 
                                             type="submit" 
@@ -1096,4 +1123,3 @@ const StudyArchitect: React.FC = () => {
 };
 
 export default StudyArchitect;
-    
